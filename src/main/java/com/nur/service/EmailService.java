@@ -17,14 +17,14 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    @Async
-    public void sendSimpleEmail(String to, String subject, String message) {
-        var mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(to);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(message);
-        mailSender.send(mailMessage);
-    }
+//    @Async
+//    public void sendSimpleEmail(String to, String subject, String message) {
+//        var mailMessage = new SimpleMailMessage();
+//        mailMessage.setTo(to);
+//        mailMessage.setSubject(subject);
+//        mailMessage.setText(message);
+//        mailSender.send(mailMessage);
+//    }
 
     @Async
     public void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
