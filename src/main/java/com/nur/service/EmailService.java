@@ -1,15 +1,18 @@
 package com.nur.service;
 
-import jakarta.mail.MessagingException;
+import com.nur.dto.EmailDTO;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -18,34 +21,22 @@ public class EmailService {
     }
 
     @Async
-    public void sendSimpleEmail(String to, String subject, String message) {
-        var mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(to);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(message);
-        mailSender.send(mailMessage);
+    public void sendEmail(EmailDTO emailDTO) {
+        LOGGER.info("Sending email to: {}", emailDTO.getEmailTo());
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(emailDTO.getEmailTo());
+            helper.setFrom(emailDTO.getEmailFrom());
+            helper.setSubject(emailDTO.getEmailSubject());
+            helper.setText(emailDTO.getEmailBody() + "\n\n" + emailDTO.getEmailSignature(), true);
+            mailSender.send(message);
+            LOGGER.info("Email sent successfully!");
+            //return true;
+        } catch (Exception e) {
+            LOGGER.error("Error sending email: {}", e.getMessage());
+            //return false;
+        }
     }
 
-    @Async
-    public void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlContent, true);
-        mailSender.send(message);
-    }
-
-    // Example method using Text Blocks for better readability
-    public String getHtmlEmailContent(String name, String country, String ratingDate) {
-        return """
-                <html>
-                <body>
-                    <h2>Hello %s,</h2>
-                    <p>A new rating action has been added for <b>%s</b> on <b>%s</b>.</p>
-                    <p>Thank you!</p>
-                </body>
-                </html>
-                """.formatted(name, country, ratingDate);
-    }
 }

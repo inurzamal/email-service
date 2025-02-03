@@ -1,6 +1,5 @@
 package com.nur.config;
 
-
 import com.nur.dto.RatingDTO;
 import com.nur.entity.RatingActionEntity;
 import org.modelmapper.ModelMapper;

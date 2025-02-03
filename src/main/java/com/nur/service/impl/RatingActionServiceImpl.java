@@ -1,19 +1,27 @@
 package com.nur.service.impl;
 
+import com.nur.dto.EmailDTO;
 import com.nur.dto.RatingDTO;
+import com.nur.entity.CrrEmailNotificationEntity;
 import com.nur.entity.RatingActionEntity;
 import com.nur.entity.id.RatingActionId;
+import com.nur.repository.CrrEmailNotificationRepository;
 import com.nur.repository.RatingActionRepository;
 import com.nur.service.EmailService;
 import com.nur.service.RatingActionService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class RatingActionServiceImpl implements RatingActionService {
+
+    @Autowired
+    CrrEmailNotificationRepository crrEmailNotificationRepository;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RatingActionServiceImpl.class);
 
     private final RatingActionRepository repository;
     private final ModelMapper modelMapper;
@@ -26,45 +34,51 @@ public class RatingActionServiceImpl implements RatingActionService {
     }
 
     @Override
-    @Transactional
     public RatingDTO addRatingAction(RatingDTO dto) {
-        // Convert DTO to Entity
         RatingActionEntity entity = modelMapper.map(dto, RatingActionEntity.class);
         entity.setId(new RatingActionId(dto.getCountry(), dto.getRatingDate()));
-
-        // Save entity
         RatingActionEntity savedAction = repository.save(entity);
+        RatingDTO responseDto = modelMapper.map(savedAction, RatingDTO.class);
 
-        // Send email asynchronously after saving
-        sendEmailNotification(dto);
+        emailService.sendEmail(createEmailDetails(dto));
 
-        return modelMapper.map(savedAction, RatingDTO.class);
+        return responseDto;
     }
 
-    private void sendEmailNotification(RatingDTO dto) {
-        String recipient = "nurzamal0077@gmail.com"; // Replace with actual user email
-        String subject = "New Rating Action Added";
-        String message = String.format("A new rating action for %s on %s has been added successfully.",
-                dto.getCountry(), dto.getRatingDate());
+    private EmailDTO createEmailDetails(RatingDTO dto) {
+        CrrEmailNotificationEntity emailDetails = crrEmailNotificationRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Email details not found"));
 
-        emailService.sendSimpleEmail(recipient, subject, message);
+        EmailDTO emailDTO = new EmailDTO();
+        emailDTO.setEmailFrom(emailDetails.getEmailFrom());
+        emailDTO.setEmailTo(emailDetails.getEmailTo());
+        emailDTO.setEmailSubject(emailDetails.getEmailSubject());
+        emailDTO.setEmailBody(emailDetails.getEmailBody() + "\n\n" + getEmailContent(dto));
+        emailDTO.setEmailSignature(emailDetails.getEmailSignature());
+        emailDTO.setCurrentCRR(String.valueOf(dto.getOldCrr()));
+        emailDTO.setProposedCRR(String.valueOf(dto.getNewCrr()));
+        emailDTO.setCurrentCRROutlook(dto.getOldCrrOutlook());
+        emailDTO.setProposedCRROutlook(dto.getNewCrrOutlook());
+        return emailDTO;
     }
 
-
-    @Override
-    public List<RatingDTO> getAllRatingActions() {
-        List<RatingActionEntity> entityList = repository.findAll();
-        return entityList.stream().map(entity -> {
-            RatingDTO dto = modelMapper.map(entity, RatingDTO.class);
-            if (entity.getId() != null) {
-                dto.setCountry(entity.getId().getCountry());
-                dto.setRatingDate(entity.getId().getRatingDate());
-            }
-            return dto;
-        }).toList();
+    private String getEmailContent(RatingDTO dto) {
+        return """
+        <html>
+        <body> <br>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr><th>Field Name</th><th>Old Value</th><th>New Value</th></tr>
+                <tr><td>CRR</td><td>%s</td><td>%s</td></tr>
+                <tr><td>CRR Outlook</td><td>%s</td><td>%s</td></tr>
+            </table>
+        </body>
+        </html>
+        """.formatted(
+                dto.getOldCrr(),
+                dto.getNewCrr(),
+                dto.getOldCrrOutlook(),
+                dto.getNewCrrOutlook()
+        );
     }
-
-
-
 }
 
