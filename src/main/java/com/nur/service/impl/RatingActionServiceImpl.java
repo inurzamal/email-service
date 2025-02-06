@@ -63,22 +63,21 @@ public class RatingActionServiceImpl implements RatingActionService {
     }
 
     private String getEmailContent(RatingDTO dto) {
-        return """
-        <html>
-        <body> <br>
-            <table border="1" cellpadding="5" cellspacing="0">
-                <tr><th>Field Name</th><th>Old Value</th><th>New Value</th></tr>
-                <tr><td>CRR</td><td>%s</td><td>%s</td></tr>
-                <tr><td>CRR Outlook</td><td>%s</td><td>%s</td></tr>
-            </table>
-        </body>
-        </html>
-        """.formatted(
+        return String.format("""
+    <html>
+    <body> <br>
+        <table border="1" cellpadding="5" cellspacing="0" width="70%%" style="border-collapse: collapse; border: 1px solid gray;">
+            <tr style="text-align: left;"><th>Field Name</th><th>Old Value</th><th>New Value</th></tr>
+            <tr><td>CRR</td><td>%s</td><td>%s</td></tr>
+            <tr><td>CRR Outlook</td><td>%s</td><td>%s</td></tr>
+        </table>
+    </body>
+    </html>
+    """,
                 dto.getOldCrr(),
                 dto.getNewCrr(),
                 dto.getOldCrrOutlook(),
-                dto.getNewCrrOutlook()
-        );
+                dto.getNewCrrOutlook());
     }
 }
 
