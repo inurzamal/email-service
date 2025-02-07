@@ -14,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class RatingActionServiceImpl implements RatingActionService {
 
     @Autowired
@@ -53,7 +55,7 @@ public class RatingActionServiceImpl implements RatingActionService {
         emailDTO.setEmailFrom(emailDetails.getEmailFrom());
         emailDTO.setEmailTo(emailDetails.getEmailTo());
         emailDTO.setEmailSubject(emailDetails.getEmailSubject());
-        emailDTO.setEmailBody(emailDetails.getEmailBody() + "\n\n" + getEmailContent(dto));
+        emailDTO.setEmailBody(emailDetails.getEmailBody() + String.format("%n%n") + getEmailContent(dto));
         emailDTO.setEmailSignature(emailDetails.getEmailSignature());
         emailDTO.setCurrentCRR(String.valueOf(dto.getOldCrr()));
         emailDTO.setProposedCRR(String.valueOf(dto.getNewCrr()));
