@@ -26,7 +26,7 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setTo(emailDTO.getEmailTo());
+            helper.setTo(emailDTO.getEmailTo().split(","));
             helper.setFrom(emailDTO.getEmailFrom());
             helper.setSubject(emailDTO.getEmailSubject());
             helper.setText(emailDTO.getEmailBody() + "\n\n" + emailDTO.getEmailSignature(), true);

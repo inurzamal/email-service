@@ -48,8 +48,7 @@ public class RatingActionServiceImpl implements RatingActionService {
     }
 
     private EmailDTO createEmailDetails(RatingDTO dto) {
-        CrrEmailNotificationEntity emailDetails = crrEmailNotificationRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Email details not found"));
+        CrrEmailNotificationEntity emailDetails = crrEmailNotificationRepository.findAll().get(0);
 
         EmailDTO emailDTO = new EmailDTO();
         emailDTO.setEmailFrom(emailDetails.getEmailFrom());
