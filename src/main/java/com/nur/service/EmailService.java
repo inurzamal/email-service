@@ -26,16 +26,14 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setTo(emailDTO.getEmailTo());
+            helper.setTo(emailDTO.getEmailTo().split(","));
             helper.setFrom(emailDTO.getEmailFrom());
-            helper.setSubject(emailDTO.getEmailSubject());
-            helper.setText(emailDTO.getEmailBody() + "\n\n" + emailDTO.getEmailSignature(), true);
+            helper.setSubject(emailDTO.getEmailSubject() + emailDTO.getCountry());
+            helper.setText(emailDTO.getEmailBody() + String.format("%n%n") + emailDTO.getEmailSignature(), true);
             mailSender.send(message);
             LOGGER.info("Email sent successfully!");
-            //return true;
         } catch (Exception e) {
             LOGGER.error("Error sending email: {}", e.getMessage());
-            //return false;
         }
     }
 

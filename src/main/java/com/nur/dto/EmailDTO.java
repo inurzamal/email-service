@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EmailDTO {
+    private String country;
     private String emailSubject;
     private String emailBody;
     private String emailFrom;
